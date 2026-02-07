@@ -8,8 +8,8 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
   const supabase = supabase.createClient(
-    "YOUR_SUPABASE_URL",
-    "YOUR_PUBLIC_ANON_KEY"
+    "https://wnpedjydocptfkfkrhmr.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InducGVkanlkb2NwdGZrZmtyaG1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0MDI4MTksImV4cCI6MjA4NTk3ODgxOX0.QtbxxivzmTRd8fGN5Lr5S0fNZOw-x6Ev3_cpyWoXhqo"
   );
 
   async function load() {
@@ -30,7 +30,7 @@
 
     // Fetch survey data
     const res = await fetch(
-      `https://YOUR_SCRIPT_URL/exec?email=${encodeURIComponent(user.email)}`
+      `https://script.google.com/macros/s/AKfycby1CWeC4MHJP6Wbs7-AMDqw-WqQyFi-sICnpidK0cKb-EegUMJ3G55ierFcjOTYnN7grg/exec?email=${encodeURIComponent(user.email)}`
     );
     const data = await res.json();
 
