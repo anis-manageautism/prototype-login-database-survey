@@ -21,13 +21,13 @@
   <div id="responses"></div>
 
   <script>
-    const supabase = supabase.createClient(
+    const supabaseClient = supabase.createClient(
       "https://wnpedjydocptfkfkrhmr.supabase.co", // YOUR SUPABASE URL
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InducGVkanlkb2NwdGZrZmtyaG1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0MDI4MTksImV4cCI6MjA4NTk3ODgxOX0.QtbxxivzmTRd8fGN5Lr5S0fNZOw-x6Ev3_cpyWoXhqo" // YOUR ANON KEY
     );
 
     async function loadDashboard() {
-      const { data: { user }, error } = await supabase.auth.getUser();
+      const { data: { user }, error } = await supabaseClient.auth.getUser();
 
       if (error) {
         console.error("Supabase getUser error:", error);
@@ -37,14 +37,13 @@
       }
 
       if (!user) {
-        // User not logged in
         window.location.href = "index.html";
         return;
       }
 
       document.getElementById("email").innerText = "Logged in as: " + user.email;
 
-      // Google Form link (no prefill)
+      // Google Form link
       const formUrl = "https://docs.google.com/forms/d/e/1oIt02qxA7EJ6x8W4DxYNFAaHimqkvfXGzA1bKxwmQpQ/viewform";
       document.getElementById("survey").href = formUrl;
 
@@ -53,18 +52,16 @@
           `https://script.google.com/macros/s/AKfycby1CWeC4MHJP6Wbs7-AMDqw-WqQyFi-sICnpidK0cKb-EegUMJ3G55ierFcjOTYnN7grg/exec?email=${encodeURIComponent(user.email)}`
         );
         const data = await res.json();
-
         const responsesDiv = document.getElementById("responses");
 
         if (!data || data.length === 0) {
-          // No responses found → show survey link
+          // No responses → show survey
           document.getElementById("survey").style.display = "inline-block";
-          responsesDiv.innerHTML = "<p>You have not completed the survey yet. Please click the button above.</p>";
+          responsesDiv.innerHTML = "<p>You have not completed the survey yet. Click the button above to take it.</p>";
         } else {
-          // Responses exist → display table
-          document.getElementById("survey").style.display = "none"; // hide survey link
+          // Responses exist → hide survey link and show table
+          document.getElementById("survey").style.display = "none";
 
-          // Build table
           const headers = Object.keys(data[0]);
           let tableHTML = "<table><tr>";
           headers.forEach(h => tableHTML += `<th>${h}</th>`);
@@ -82,7 +79,6 @@
       } catch (err) {
         console.error("Error fetching responses:", err);
         document.getElementById("responses").innerHTML = "<p>Error loading survey responses. Try again later.</p>";
-        // still show survey link in case
         document.getElementById("survey").style.display = "inline-block";
       }
     }
