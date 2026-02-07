@@ -2,11 +2,10 @@
 <html>
 <head>
   <title>Login / Sign Up</title>
-  <!-- Supabase JS -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: sans-serif; padding: 2rem; max-width: 400px; margin: auto; }
-    input { display: block; margin-bottom: 1rem; width: 100%; padding: 0.5rem; }
+    body { font-family: sans-serif; max-width: 400px; margin: auto; padding: 2rem; }
+    input { display: block; width: 100%; margin-bottom: 1rem; padding: 0.5rem; }
     button { padding: 0.5rem 1rem; margin-right: 0.5rem; }
   </style>
 </head>
@@ -20,17 +19,13 @@
   <button onclick="login()">Login</button>
 
   <script>
-    // ---------------------------
-    // 1. Initialize Supabase
-    // ---------------------------
-    const supabase = supabase.createClient(
-      "https://wnpedjydocptfkfkrhmr.supabase.co", // replace with YOUR Supabase URL
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InducGVkanlkb2NwdGZrZmtyaG1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0MDI4MTksImV4cCI6MjA4NTk3ODgxOX0.QtbxxivzmTRd8fGN5Lr5S0fNZOw-x6Ev3_cpyWoXhqo" // replace with YOUR anon public key
+    // Initialize Supabase with a unique variable name
+    const supabaseClient = supabase.createClient(
+      "https://wnpedjydocptfkfkrhmr.supabase.co", // YOUR SUPABASE URL
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InducGVkanlkb2NwdGZrZmtyaG1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0MDI4MTksImV4cCI6MjA4NTk3ODgxOX0.QtbxxivzmTRd8fGN5Lr5S0fNZOw-x6Ev3_cpyWoXhqo" // YOUR ANON KEY
     );
 
-    // ---------------------------
-    // 2. Sign up function
-    // ---------------------------
+    // Sign Up Function
     async function signup() {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
@@ -41,20 +36,18 @@
       }
 
       console.log("Signing up:", email);
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
 
       if (error) {
         console.error("Sign up error:", error);
         alert("Error signing up: " + error.message);
       } else {
-        console.log("Sign up data:", data);
-        alert("Account created! You can now log in.");
+        console.log("Sign up success:", data);
+        alert("Account created. You can now log in.");
       }
     }
 
-    // ---------------------------
-    // 3. Login function
-    // ---------------------------
+    // Login Function
     async function login() {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
@@ -65,22 +58,21 @@
       }
 
       console.log("Logging in:", email);
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
       if (error) {
         console.error("Login error:", error);
         alert("Error logging in: " + error.message);
       } else {
-        console.log("Login successful:", data);
+        console.log("Login success:", data);
+        // Redirect to dashboard
         window.location.href = "dashboard.html";
       }
     }
 
-    // ---------------------------
-    // 4. Debug: check current session
-    // ---------------------------
+    // Optional: check session on page load
     async function checkSession() {
-      const { data: { session }, error } = await supabase.auth.getSession();
+      const { data: { session }, error } = await supabaseClient.auth.getSession();
       if (session) {
         console.log("User already logged in:", session.user.email);
         // Optionally redirect automatically
