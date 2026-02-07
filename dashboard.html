@@ -1,42 +1,93 @@
-<h2>Your Dashboard</h2>
-<p id="email"></p>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 2rem; }
+    h2 { margin-bottom: 0.5rem; }
+    #responses { margin-top: 2rem; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+    a { display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #0070f3; color: white; text-decoration: none; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h2>Your Dashboard</h2>
+  <p id="email"></p>
 
-<a id="survey" target="_blank">Take the survey</a>
+  <a id="survey" target="_blank" style="display:none;">Take the survey</a>
 
-<div id="responses"></div>
+  <div id="responses"></div>
 
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script>
-  const supabase = supabase.createClient(
-    "https://wnpedjydocptfkfkrhmr.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InducGVkanlkb2NwdGZrZmtyaG1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0MDI4MTksImV4cCI6MjA4NTk3ODgxOX0.QtbxxivzmTRd8fGN5Lr5S0fNZOw-x6Ev3_cpyWoXhqo"
-  );
+  <script>
+    const supabase = supabase.createClient(
+      "https://wnpedjydocptfkfkrhmr.supabase.co", // YOUR SUPABASE URL
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InducGVkanlkb2NwdGZrZmtyaG1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0MDI4MTksImV4cCI6MjA4NTk3ODgxOX0.QtbxxivzmTRd8fGN5Lr5S0fNZOw-x6Ev3_cpyWoXhqo" // YOUR ANON KEY
+    );
 
-  async function load() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      window.location = "index.html";
-      return;
+    async function loadDashboard() {
+      const { data: { user }, error } = await supabase.auth.getUser();
+
+      if (error) {
+        console.error("Supabase getUser error:", error);
+        alert("Error fetching user. Please log in again.");
+        window.location.href = "index.html";
+        return;
+      }
+
+      if (!user) {
+        // User not logged in
+        window.location.href = "index.html";
+        return;
+      }
+
+      document.getElementById("email").innerText = "Logged in as: " + user.email;
+
+      // Google Form link (no prefill)
+      const formUrl = "https://docs.google.com/forms/d/e/1oIt02qxA7EJ6x8W4DxYNFAaHimqkvfXGzA1bKxwmQpQ/viewform";
+      document.getElementById("survey").href = formUrl;
+
+      try {
+        const res = await fetch(
+          `https://script.google.com/macros/s/AKfycby1CWeC4MHJP6Wbs7-AMDqw-WqQyFi-sICnpidK0cKb-EegUMJ3G55ierFcjOTYnN7grg/exec?email=${encodeURIComponent(user.email)}`
+        );
+        const data = await res.json();
+
+        const responsesDiv = document.getElementById("responses");
+
+        if (!data || data.length === 0) {
+          // No responses found → show survey link
+          document.getElementById("survey").style.display = "inline-block";
+          responsesDiv.innerHTML = "<p>You have not completed the survey yet. Please click the button above.</p>";
+        } else {
+          // Responses exist → display table
+          document.getElementById("survey").style.display = "none"; // hide survey link
+
+          // Build table
+          const headers = Object.keys(data[0]);
+          let tableHTML = "<table><tr>";
+          headers.forEach(h => tableHTML += `<th>${h}</th>`);
+          tableHTML += "</tr>";
+
+          data.forEach(row => {
+            tableHTML += "<tr>";
+            headers.forEach(h => tableHTML += `<td>${row[h]}</td>`);
+            tableHTML += "</tr>";
+          });
+
+          tableHTML += "</table>";
+          responsesDiv.innerHTML = tableHTML;
+        }
+      } catch (err) {
+        console.error("Error fetching responses:", err);
+        document.getElementById("responses").innerHTML = "<p>Error loading survey responses. Try again later.</p>";
+        // still show survey link in case
+        document.getElementById("survey").style.display = "inline-block";
+      }
     }
 
-    document.getElementById("email").innerText = user.email;
-
-    // Prefilled Google Form
-    const formUrl =
-  "https://docs.google.com/forms/d/e/1oIt02qxA7EJ6x8W4DxYNFAaHimqkvfXGzA1bKxwmQpQ/viewform";
-      encodeURIComponent(user.email);
-
-    document.getElementById("survey").href = formUrl;
-
-    // Fetch survey data
-    const res = await fetch(
-      `https://script.google.com/macros/s/AKfycby1CWeC4MHJP6Wbs7-AMDqw-WqQyFi-sICnpidK0cKb-EegUMJ3G55ierFcjOTYnN7grg/exec?email=${encodeURIComponent(user.email)}`
-    );
-    const data = await res.json();
-
-    document.getElementById("responses").innerHTML =
-      "<pre>" + JSON.stringify(data, null, 2) + "</pre>";
-  }
-
-  load();
-</script>
+    loadDashboard();
+  </script>
+</body>
+</html>
