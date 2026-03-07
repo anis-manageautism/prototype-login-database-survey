@@ -1,0 +1,14 @@
+.landing-page-1 {
+    background-image: url('../images/background.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-size:100%;
+  }
+
+.segoeuiBoldDodgerBlue40px {
+  color: #1C86EE;
+  font-size: 40px;
+  font-family: "SegoeUI-Bold";
+  font-style: normal;
+  font-weight: 700;
+  }
